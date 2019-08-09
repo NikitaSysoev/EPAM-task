@@ -1,0 +1,8 @@
+.category_title {
+  display: flex;
+  justify-content: space-between;
+}
+
+.category_content .category {
+  margin-left: 20px;
+}
