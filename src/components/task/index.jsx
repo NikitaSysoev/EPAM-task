@@ -8,6 +8,7 @@ const detailsIcon = <div style={{ marginLeft: '5px', cursor: 'pointer' }}>
 
 const Task = props => {
     const { title, done } = props.item;
+    // вместо title передавать id
     const handleChecked = () => props.onToggleReady(title);
     return (
         <div className="card">
@@ -15,7 +16,7 @@ const Task = props => {
                 <div>
                     <input type="checkbox"
                         defaultChecked={done}
-                        onChange={handleChecked}
+                        onClick={handleChecked}
                         style={{ marginRight: '30px' }} />
                     {title}
                 </div>

@@ -77,7 +77,8 @@ export default class App extends React.Component {
   }
 
   calculatePercentage = () => {
-    const allItems = flatten(this.state.data)
+    const tree = deepClone(this.state.data);
+    const allItems = flatten(tree)
       .map(item => item.items)
       .reduce((acc, item) => acc.concat(item));
     const { length } = allItems;
@@ -92,12 +93,11 @@ export default class App extends React.Component {
     this.setState({ taskList: category.items, category });
   };
 
-  handleAddCategory = e => {
-    const newCategoryName = e.currentTarget.getAttribute("value");
-    if (newCategoryName) {
+  handleAddCategory = text => {
+    if (text) {
       const newCategory = {
         id: Date.now(),
-        name: newCategoryName,
+        name: text,
         items: [],
         sub: []
       };
@@ -109,12 +109,11 @@ export default class App extends React.Component {
 
   handleAddSubcategory = e => {};
 
-  handleAddItem = e => {
+  handleAddItem = text => {
     const { category, taskList, data } = this.state;
-    const newItemName = e.currentTarget.getAttribute("value");
-    if (newItemName) {
+    if (text && category) {
       const newItem = {
-        title: newItemName,
+        title: text,
         done: false
       };
       const tree = deepClone(data);

@@ -1,21 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const TextInput = props => {
-    const { name, onChange, value = '', onClick, placeholder, buttonName, width = '100%' } = props;
+    const [text, setText] = useState('');
+    const handleChange = (e) => setText(e.target.value);
+    const { name, onClick, placeholder, buttonName, width = '100%' } = props;
+    const handleClick = () => onClick(text);
     return (
         <div className="input-group" style={{ width }}>
             <input
-                onChange={onChange}
+                onChange={handleChange}
                 type="text"
                 name={name}
-                value={value}
-                className={`form-control`}
+                value={text}
+                className="form-control"
                 placeholder={placeholder}
             />
             <div
                 className="input-group-append"
-                value={value}
-                onClick={onClick}
+                onClick={handleClick}
                 style={{ cursor: 'pointer' }}
             >
                 <span className="input-group-text">
