@@ -7,9 +7,9 @@ const detailsIcon = <div style={{ marginLeft: '5px', cursor: 'pointer' }}>
 </div>
 
 const Task = props => {
-    const { title, done } = props.item;
-    // вместо title передавать id
-    const handleChecked = () => props.onToggleReady(title);
+    const { item, onToggleReady } = props;
+    const { title, done, id } = item;
+    const handleChecked = () => onToggleReady(id);
     return (
         <div className="card">
             <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between' }}>

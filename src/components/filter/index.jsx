@@ -1,28 +1,33 @@
 import React from 'react';
 import TextInput from '../textInput';
 
-export default class Filter extends React.Component {
-    render() {
-        return (
+const Filter = (props) => {
+    const { onSwitchShowDone, showDone } = props;
+    return (
+        <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline'
+        }}>
+            <div>To-Do List</div>
             <div style={{
                 display: 'flex',
-                justifyContent: 'space-between',
+                justifyContent: 'flex-start',
                 alignItems: 'baseline'
             }}>
-                <div>To-Do List</div>
-                <div style={{
-                    display: 'flex',
-                    justifyContent: 'flex-start',
-                    alignItems: 'baseline'
-                }}>
-                    <label style={{ marginRight: '20px', cursor: 'ponter' }}>
-                        <input type="checkbox" /> Show done</label>
-                    <TextInput
-                        placeholder="Search"
-                        width="300px"
-                    />
-                </div>
+                <label style={{ marginRight: '20px', cursor: 'ponter' }}>
+                    <input type="checkbox"
+                        onChange={onSwitchShowDone}
+                        defaultChecked={showDone} />
+                    Show done
+                    </label>
+                <TextInput
+                    placeholder="Search"
+                    width="300px"
+                />
             </div>
-        )
-    }
+        </div>
+    )
 }
+
+export default Filter;

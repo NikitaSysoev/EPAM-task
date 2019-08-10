@@ -18,8 +18,8 @@ export default class App extends React.Component {
           id: 1,
           name: "category1",
           items: [
-            { title: "to do item 1", done: true },
-            { title: "to do item 2", done: true }
+            { id: 11, title: "to do item 1", done: true },
+            { id: 12, title: "to do item 2", done: true }
           ],
           sub: []
         },
@@ -27,8 +27,8 @@ export default class App extends React.Component {
           id: 2,
           name: "category2",
           items: [
-            { title: "to do item 3", done: true },
-            { title: "to do item 4", done: true }
+            { id: 21, title: "to do item 3", done: true },
+            { id: 22, title: "to do item 4", done: false }
           ],
           sub: []
         },
@@ -36,8 +36,8 @@ export default class App extends React.Component {
           id: 3,
           name: "category3",
           items: [
-            { title: "to do item 5", done: false },
-            { title: "to do item 6", done: false }
+            { id: 31, title: "to do item 5", done: false },
+            { id: 32, title: "to do item 6", done: false }
           ],
           sub: [
             { id: 4, name: "category3 1", items: [] },
@@ -45,24 +45,29 @@ export default class App extends React.Component {
               id: 5,
               name: "category3 2",
               items: [
-                { title: "to do item 7", done: false },
-                { title: "to do item 8", done: false }
+                { id: 41, title: "to do item 7", done: false },
+                { id: 42, title: "to do item 8", done: false }
               ],
               sub: [
-                { id: 55, name: "ok", items: [{ title: "ok", done: false }] }
+                {
+                  id: 55,
+                  name: "ok",
+                  items: [{ id: 551, title: "ok", done: true }]
+                }
               ]
             },
             {
               id: 6,
               name: "category3 3",
-              items: [{ title: "to do item 9", done: false }]
+              items: [{ id: 61, title: "to do item 9", done: false }]
             }
           ]
         }
       ],
       category: null,
       percentage: 0,
-      taskList: []
+      taskList: [],
+      showDone: false
     };
   }
 
@@ -87,10 +92,25 @@ export default class App extends React.Component {
     this.setState({ percentage });
   };
 
+  showAllItems = () => {
+    const tree = deepClone(this.state.data);
+    const category = findObj(tree, this.state.category.id);
+    this.setState({ taskList: category.items });
+  };
+
+  showOnlyDoneItems = () => {
+    const tree = deepClone(this.state.data);
+    let category = findObj(tree, this.state.category.id);
+    let taskList = category.items.filter(item => item.done);
+    this.setState({ taskList });
+  };
+
   handleShowItems = id => {
     const tree = deepClone(this.state.data);
     const category = findObj(tree, id);
-    this.setState({ taskList: category.items, category });
+    this.setState({ taskList: category.items, category }, () => {
+      this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
+    });
   };
 
   handleAddCategory = text => {
@@ -109,10 +129,21 @@ export default class App extends React.Component {
 
   handleAddSubcategory = e => {};
 
+  handleDeleteCategory = () => {};
+
+  handleShowSubCategories = () => {};
+
+  handleShowDetails = () => {};
+
+  handleMoveTaskIntoAnotherCategory =() => {};
+
+  handleEditCategoryName = () => {};
+
   handleAddItem = text => {
     const { category, taskList, data } = this.state;
     if (text && category) {
       const newItem = {
+        id: Date.now(),
         title: text,
         done: false
       };
@@ -137,14 +168,14 @@ export default class App extends React.Component {
     }
   };
 
-  handleToggleReady = title => {
+  handleToggleReady = id => {
     const { data, category } = this.state;
     const tree = deepClone(data);
     const newStateData = tree.map(item => {
       const cell = findFirst(item, "sub", { id: category.id });
       if (cell) {
         const newCellItems = cell.items.map(item => {
-          if (item.title === title) item.done = !item.done;
+          if (item.id === id) item.done = !item.done;
           return item;
         });
         return findAndModifyFirst(
@@ -157,20 +188,33 @@ export default class App extends React.Component {
         return item;
       }
     });
-    this.setState({
-      data: newStateData
+    this.setState(
+      {
+        data: newStateData
+      },
+      () => {
+        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
+      }
+    );
+  };
+
+  handleSwitchShowDone = () => {
+    const { showDone, category } = this.state;
+    this.setState({ showDone: !showDone }, () => {
+      if (category) {
+        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
+      }
     });
   };
 
-  // handleDeleteCategory = () => {};
-
-  // handleAddItem = () => {};
-
   render() {
-    const { percentage, data, taskList } = this.state;
+    const { percentage, data, taskList, showDone } = this.state;
     return (
-      <div className="App">
-        <Filter />
+      <div className="App container">
+        <Filter
+          onSwitchShowDone={this.handleSwitchShowDone}
+          showDone={showDone}
+        />
         <ProgressBar percentage={percentage} />
         <div className="Main_body">
           <CategoryList

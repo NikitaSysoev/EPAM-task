@@ -15,7 +15,7 @@ const TaskList = (props) => {
             {
                 taskList.length ?
                     taskList.map(item => <Task
-                        key={item.title}
+                        key={item.id}
                         item={item}
                         onToggleReady={onToggleReady} />)
                     : 'no data'
