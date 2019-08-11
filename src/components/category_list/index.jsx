@@ -1,13 +1,15 @@
 import React from 'react';
 
+import './index.css';
 import TextInput from '../textInput';
 import Category from '../category';
 
 const CategoryList = (props) => {
-    const { data, onShowItems, onAddCategory } = props;
+    const { data, onShowItems, onAddCategory, categoryId,
+        onDeleteCategory, onAddSubCategory, onEditCategoryName } = props;
     return (
-        <div>
-            <div style={{ marginBottom: '20px' }}>
+        <div className="category-list">
+            <div style={{ margin: '0 20px 20px 0' }}>
                 <TextInput
                     name='category'
                     onClick={onAddCategory}
@@ -15,7 +17,16 @@ const CategoryList = (props) => {
                     buttonName="Add" />
             </div>
             {
-                data.map(item => <Category key={item.id} item={item} onShowItems={onShowItems} />)
+                data.length ? data.map(item =>
+                    <Category
+                        key={item.id}
+                        categoryId={categoryId}
+                        item={item}
+                        onAddSubCategory={onAddSubCategory}
+                        onEditCategoryName={onEditCategoryName}
+                        onShowItems={onShowItems}
+                        onDeleteCategory={onDeleteCategory}
+                    />) : <div>No categories</div>
             }
         </div>
     )

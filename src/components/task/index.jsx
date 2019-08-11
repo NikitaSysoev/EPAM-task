@@ -12,7 +12,10 @@ const Task = props => {
     const handleChecked = () => onToggleReady(id);
     return (
         <div className="card">
-            <div className="card-body" style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="card-body" style={{
+                display: 'flex',
+                justifyContent: 'space-between'
+            }}>
                 <div>
                     <input type="checkbox"
                         defaultChecked={done}
