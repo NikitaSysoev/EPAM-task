@@ -60,6 +60,7 @@ export default class App extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     if (JSON.stringify(this.state.data) !== JSON.stringify(prevState.data)) {
       this.calculatePercentage();
+      this.rerenderItems();
     }
   }
 
@@ -90,26 +91,29 @@ export default class App extends React.Component {
     this.setState({ taskList });
   };
 
+  rerenderItems = () => {
+    const { showDone, category } = this.state;
+    if (category) {
+      showDone ? this.showOnlyDoneItems() : this.showAllItems();
+    }
+  };
+
   handleShowItems = id => {
     const tree = deepClone(this.state.data);
     const category = findObj(tree, id);
-    this.setState({ taskList: category.items, category, categoryId: id }, () => {
-      this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
-    });
+    this.setState({ taskList: category.items, category, categoryId: id });
   };
 
   handleAddCategory = text => {
-    if (text) {
-      const newCategory = {
-        id: Date.now(),
-        name: text,
-        items: [],
-        sub: []
-      };
-      this.setState({
-        data: [newCategory, ...this.state.data]
-      });
-    }
+    const newCategory = {
+      id: Date.now(),
+      name: text,
+      items: [],
+      sub: []
+    };
+    this.setState({
+      data: [newCategory, ...this.state.data]
+    });
   };
 
   handleAddSubcategory = (id, text) => {
@@ -241,9 +245,7 @@ export default class App extends React.Component {
             return category;
           }
         });
-      this.setState({ data: newStateData }, () => {
-        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
-      });
+      this.setState({ data: newStateData });
     } else {
       const newStateData = tree.map(category => {
         const cell = findFirst(category, 'sub', { id: categoryId });
@@ -278,9 +280,7 @@ export default class App extends React.Component {
           return category;
         }
       });
-      this.setState({ data: newStateData }, () => {
-        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
-      });
+      this.setState({ data: newStateData });
     }
   };
 
@@ -345,23 +345,12 @@ export default class App extends React.Component {
         return item;
       }
     });
-    this.setState(
-      {
-        data: newStateData
-      },
-      () => {
-        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
-      }
-    );
+    this.setState({ data: newStateData });
   };
 
   handleSwitchShowDone = () => {
-    const { showDone, category } = this.state;
-    this.setState({ showDone: !showDone }, () => {
-      if (category) {
-        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
-      }
-    });
+    const { showDone } = this.state;
+    this.setState({ showDone: !showDone }, this.rerenderItems);
   };
 
   render() {

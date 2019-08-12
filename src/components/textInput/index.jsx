@@ -5,8 +5,10 @@ const TextInput = props => {
     const handleChange = (e) => setText(e.target.value);
     const { name, onClick, placeholder, buttonName, width = '100%' } = props;
     const handleClick = () => {
-        onClick(text);
-        setText('');
+        if (text) {
+            onClick(text);
+            setText('');
+        }
     }
     return (
         <div className="input-group" style={{ width }}>

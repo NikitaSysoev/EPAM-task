@@ -4,10 +4,11 @@ import * as ACT from './actions';
 const initialState = {
   data: [],
   category: null,
+  categoryId: 0,
   percentage: 0,
   taskList: [],
-  taskId: null,
-  showDone: false
+  showDone: false,
+  formState: {}
 };
 
 function rootReducer(store = initialState, action) {
@@ -31,7 +32,7 @@ function rootReducer(store = initialState, action) {
   }
 }
 
-export default history =>
+export default () =>
   combineReducers({
     app: rootReducer
   });
