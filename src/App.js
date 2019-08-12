@@ -2,6 +2,7 @@ import React from 'react';
 import { findAndModifyFirst, findFirst, findAndDeleteFirst } from 'obj-traverse/lib/obj-traverse';
 
 import { flatten, findObj, deepClone } from './lib';
+import { FORM_ADD, FORM_EDIT } from './lib/const';
 import './App.css';
 import CategoryList from './components/category_list';
 import TaskList from './components/task_list';
@@ -14,32 +15,13 @@ export default class App extends React.Component {
     this.state = {
       data: [
         {
-          id: 1,
-          name: 'category1',
-          items: [
-            { id: 11, title: 'to do item 1', done: true },
-            { id: 12, title: 'to do item 2', done: true }
-          ],
-          sub: []
-        },
-        {
-          id: 2,
-          name: 'category2',
-          items: [
-            { id: 21, title: 'to do item 3', done: true },
-            { id: 22, title: 'to do item 4', done: false }
-          ],
-          sub: []
-        },
-        {
           id: 3,
           name: 'category3',
           items: [
-            { id: 31, title: 'to do item 5', done: false },
-            { id: 32, title: 'to do item 6', done: false }
+            { id: 31, title: 'to do item 5', done: true, description: 'okey' },
+            { id: 32, title: 'to do item 6', done: false, description: 'lets go' }
           ],
           sub: [
-            { id: 4, name: 'category3 1', items: [] },
             {
               id: 5,
               name: 'category3 2',
@@ -54,11 +36,6 @@ export default class App extends React.Component {
                   items: [{ id: 551, title: 'ok', done: true }]
                 }
               ]
-            },
-            {
-              id: 6,
-              name: 'category3 3',
-              items: [{ id: 61, title: 'to do item 9', done: false }]
             }
           ]
         }
@@ -67,7 +44,12 @@ export default class App extends React.Component {
       categoryId: 0,
       percentage: 0,
       taskList: [],
-      showDone: false
+      showDone: false,
+      formState: {
+        state: FORM_ADD,
+        editItem: null,
+        moveTask: false
+      }
     };
   }
 
@@ -146,7 +128,7 @@ export default class App extends React.Component {
           item,
           'sub',
           { id },
-          { ...cell, sub: [newCategory, ...item.sub] }
+          { ...cell, sub: [newCategory, ...cell.sub] }
         );
       } else {
         return item;
@@ -191,9 +173,127 @@ export default class App extends React.Component {
     this.setState({ data: newStateData });
   };
 
-  // handleShowDetails = () => {};
+  handleShowDetails = id => {
+    const tree = deepClone(this.state.data);
+    const category = findObj(tree, this.state.categoryId);
+    const item = category.items.find(item => item.id === id);
+    this.setState({
+      formState: {
+        state: FORM_EDIT,
+        editItem: item,
+        currentCategoryId: this.state.categoryId
+      },
+      category
+    });
+  };
 
-  // handleMoveTaskIntoAnotherCategory = () => {};
+  handleCloseDetails = () => {
+    this.setState({
+      formState: {
+        state: FORM_ADD,
+        editItem: null,
+        moveTask: false
+      }
+    });
+  };
+
+  handleUpgradeItems = (itemId, categoryId, newItem) => {
+    const { data, formState } = this.state;
+    const tree = deepClone(data);
+    if (formState.moveTask) {
+      const newStateData = tree
+        .map(category => {
+          const cell = findFirst(category, 'sub', { id: formState.prevCategoryId });
+          if (category.id === formState.prevCategoryId) {
+            return { ...category, items: category.items.filter(i => i.id !== newItem.id) };
+          } else if (cell) {
+            return findAndModifyFirst(
+              category,
+              'sub',
+              { id: formState.prevCategoryId },
+              {
+                ...cell,
+                items: cell.items.filter(i => i.id !== newItem.id)
+              }
+            );
+          } else {
+            return category;
+          }
+        })
+        .map(category => {
+          const cell = findFirst(category, 'sub', { id: categoryId });
+          if (category.id === categoryId) {
+            return {
+              ...category,
+              items: [newItem, ...category.items]
+            };
+          } else if (cell) {
+            return findAndModifyFirst(
+              category,
+              'sub',
+              { id: categoryId },
+              {
+                ...cell,
+                items: [newItem, ...cell.items]
+              }
+            );
+          } else {
+            return category;
+          }
+        });
+      this.setState({ data: newStateData }, () => {
+        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
+      });
+    } else {
+      const newStateData = tree.map(category => {
+        const cell = findFirst(category, 'sub', { id: categoryId });
+        if (category.id === categoryId) {
+          return {
+            ...category,
+            items: category.items.map(item => {
+              if (item.id === itemId) {
+                return newItem;
+              } else {
+                return item;
+              }
+            })
+          };
+        } else if (cell) {
+          return findAndModifyFirst(
+            category,
+            'sub',
+            { id: categoryId },
+            {
+              ...cell,
+              items: cell.items.map(item => {
+                if (item.id === itemId) {
+                  return newItem;
+                } else {
+                  return item;
+                }
+              })
+            }
+          );
+        } else {
+          return category;
+        }
+      });
+      this.setState({ data: newStateData }, () => {
+        this.state.showDone ? this.showOnlyDoneItems() : this.showAllItems();
+      });
+    }
+  };
+
+  handleMoveTaskIntoAnotherCategory = id => {
+    this.setState(prevState => ({
+      formState: {
+        ...prevState.formState,
+        currentCategoryId: id,
+        moveTask: true,
+        prevCategoryId: prevState.formState.currentCategoryId
+      }
+    }));
+  };
 
   handleAddItem = text => {
     const { category, taskList, data } = this.state;
@@ -201,7 +301,8 @@ export default class App extends React.Component {
       const newItem = {
         id: Date.now(),
         title: text,
-        done: false
+        done: false,
+        description: ''
       };
       const tree = deepClone(data);
       const newStateData = tree.map(item => {
@@ -264,15 +365,21 @@ export default class App extends React.Component {
   };
 
   render() {
-    const { percentage, data, taskList, showDone, categoryId } = this.state;
+    const { percentage, data, taskList, showDone, categoryId, formState } = this.state;
     return (
       <div className="App container">
-        <Filter onSwitchShowDone={this.handleSwitchShowDone} showDone={showDone} />
+        <Filter
+          formState={formState}
+          onSwitchShowDone={this.handleSwitchShowDone}
+          showDone={showDone}
+        />
         <ProgressBar percentage={percentage} />
         <div className="Main_body">
           <CategoryList
             data={data}
             categoryId={categoryId}
+            formState={formState}
+            onMoveTaskIntoAnotherCategory={this.handleMoveTaskIntoAnotherCategory}
             onAddSubCategory={this.handleAddSubcategory}
             onShowItems={this.handleShowItems}
             onEditCategoryName={this.handleEditCategoryName}
@@ -281,6 +388,10 @@ export default class App extends React.Component {
           />
           <TaskList
             taskList={taskList}
+            onUpgradeItems={this.handleUpgradeItems}
+            onShowDetails={this.handleShowDetails}
+            onCloseDetails={this.handleCloseDetails}
+            formState={formState}
             onAddItem={this.handleAddItem}
             onToggleReady={this.handleToggleReady}
           />

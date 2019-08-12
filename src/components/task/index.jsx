@@ -1,29 +1,33 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faDollarSign } from '@fortawesome/free-solid-svg-icons';
+import { faEdit } from '@fortawesome/free-solid-svg-icons';
 
 const detailsIcon = <div style={{ marginLeft: '5px', cursor: 'pointer' }}>
-    <FontAwesomeIcon icon={faDollarSign} />
+    <FontAwesomeIcon icon={faEdit} />
 </div>
 
 const Task = props => {
-    const { item, onToggleReady } = props;
+    const { item, onToggleReady, onShowDetails } = props;
     const { title, done, id } = item;
     const handleChecked = () => onToggleReady(id);
+    const handleShowDetails = () => onShowDetails(id);
     return (
         <div className="card">
-            <div className="card-body" style={{
-                display: 'flex',
-                justifyContent: 'space-between'
-            }}>
+            <div className="card-body"
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between'
+                }}>
                 <div>
                     <input type="checkbox"
-                        defaultChecked={done}
-                        onClick={handleChecked}
+                        checked={done}
+                        onChange={handleChecked}
                         style={{ marginRight: '30px' }} />
                     {title}
                 </div>
-                {detailsIcon}
+                <div onClick={handleShowDetails}>
+                    {detailsIcon}
+                </div>
             </div>
         </div>
     )

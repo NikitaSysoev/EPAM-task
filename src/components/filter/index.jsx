@@ -1,15 +1,18 @@
 import React from 'react';
 import TextInput from '../textInput';
+import { FORM_EDIT } from '../../lib/const';
 
 const Filter = (props) => {
-    const { onSwitchShowDone, showDone } = props;
+    const { onSwitchShowDone, showDone, formState } = props;
     return (
         <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'baseline'
         }}>
-            <div>To-Do List</div>
+            <div>
+                {formState.state === FORM_EDIT ? formState.editItem.title : 'To-Do List'}
+            </div>
             <div style={{
                 display: 'flex',
                 justifyContent: 'flex-start',
@@ -18,7 +21,8 @@ const Filter = (props) => {
                 <label style={{ marginRight: '20px', cursor: 'ponter' }}>
                     <input type="checkbox"
                         onChange={onSwitchShowDone}
-                        defaultChecked={showDone} />
+                        defaultChecked={showDone}
+                    />
                     Show done
                     </label>
                 <TextInput

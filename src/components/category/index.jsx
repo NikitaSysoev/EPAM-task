@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare, faShoppingBasket, faDollarSign, faAngleDown, faAngleRight, faBan, faCheck }
+import {
+    faPlusSquare, faShoppingBasket, faEdit, faAngleDown, faAngleRight,
+    faBan, faCheck, faArrowCircleLeft
+}
     from '@fortawesome/free-solid-svg-icons';
+
 import './index.css';
+import { FORM_ADD } from '../../lib/const';
 
 const plusIcon = <div style={{ cursor: 'pointer' }}>
     <FontAwesomeIcon icon={faPlusSquare} />
@@ -11,7 +16,7 @@ const deleteIcon = <div style={{ marginLeft: '5px', cursor: 'pointer' }}>
     <FontAwesomeIcon icon={faShoppingBasket} />
 </div>;
 const detailsIcon = <div style={{ marginLeft: '5px', cursor: 'pointer' }}>
-    <FontAwesomeIcon icon={faDollarSign} />
+    <FontAwesomeIcon icon={faEdit} />
 </div>
 const subCategoriesClosedIcon = <div style={{ marginRight: '5px', cursor: 'pointer' }}>
     <FontAwesomeIcon icon={faAngleRight} />
@@ -33,7 +38,7 @@ const Category = props => {
     const [status, setStatus] = useState(null);
 
     const { onShowItems, item, categoryId, onDeleteCategory,
-        onEditCategoryName, onAddSubCategory } = props;
+        onEditCategoryName, onAddSubCategory, formState, onMoveTaskIntoAnotherCategory } = props;
     const { name, sub, id } = item;
 
     const handleShowItems = () => onShowItems(id);
@@ -62,6 +67,7 @@ const Category = props => {
         setEdit(false);
         setStatus(null);
     }
+    const handleMoveTaskIntoAnotherCategory = () => onMoveTaskIntoAnotherCategory(id);
 
     return (
         <div className="category">
@@ -69,18 +75,25 @@ const Category = props => {
                 <div className="category_title card-body">
                     <div style={{ display: 'flex' }}>
                         <div onClick={handleShowSubCategories}>
-                            {visible && sub && sub.length ?
+                            {(sub && !sub.length) || (!sub) ? '' : sub && sub.length && visible ?
                                 subCategoriesOpenedIcon : subCategoriesClosedIcon}
                         </div>
                         {
-                            edit ? <input type="text" value={text} onChange={handleChangeText} />
-                                : <span style={{ color: '#007bff' }}
+                            edit ? <input
+                                type="text"
+                                value={text}
+                                onChange={handleChangeText}
+                                style={{ margin: '0 10px' }}
+                            />
+                                : <span
+                                    style={{ color: '#007bff', cursor: 'pointer', margin: '0 10px' }}
                                     onClick={handleShowItems}>
                                     {name}
                                 </span>
                         }
                         {
-                            !edit && <div name="editCategoryName" onClick={handleEdit}>
+                            !edit && formState.state === FORM_ADD &&
+                            <div name="editCategoryName" onClick={handleEdit}>
                                 {detailsIcon}
                             </div>
                         }
@@ -94,15 +107,25 @@ const Category = props => {
                         }
                     </div>
                     {
-                        !edit && <div style={{ display: 'flex' }}>
-                            <div name="addSubCategory"
-                                onClick={handleEdit}>
-                                {plusIcon}
+                        !edit && formState.state === FORM_ADD ?
+                            <div style={{ display: 'flex' }}>
+                                <div name="addSubCategory"
+                                    onClick={handleEdit}>
+                                    {plusIcon}
+                                </div>
+                                <div onClick={handleDeleteCategory}>
+                                    {deleteIcon}
+                                </div>
                             </div>
-                            <div onClick={handleDeleteCategory}>
-                                {deleteIcon}
-                            </div>
-                        </div>
+                            : !edit ?
+                                <div onClick={handleMoveTaskIntoAnotherCategory}
+                                    style={{
+                                        marginRight: '5px', cursor: 'pointer',
+                                        color: formState.currentCategoryId === id ? 'grey' : "black"
+                                    }}
+                                >
+                                    <FontAwesomeIcon icon={faArrowCircleLeft} />
+                                </div> : ''
                     }
                 </div>
 
@@ -113,11 +136,14 @@ const Category = props => {
                         <Category
                             key={item.id}
                             item={item}
+                            formState={formState}
                             categoryId={categoryId}
+                            onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
                             onAddSubCategory={onAddSubCategory}
                             onEditCategoryName={onEditCategoryName}
                             onDeleteCategory={onDeleteCategory}
-                            onShowItems={onShowItems} />)
+                            onShowItems={onShowItems}
+                        />)
                 }
             </div>
         </div>

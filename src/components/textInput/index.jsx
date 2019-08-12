@@ -4,7 +4,10 @@ const TextInput = props => {
     const [text, setText] = useState('');
     const handleChange = (e) => setText(e.target.value);
     const { name, onClick, placeholder, buttonName, width = '100%' } = props;
-    const handleClick = () => onClick(text);
+    const handleClick = () => {
+        onClick(text);
+        setText('');
+    }
     return (
         <div className="input-group" style={{ width }}>
             <input
