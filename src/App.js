@@ -1,7 +1,9 @@
 import React from 'react';
-import { findAndModifyFirst, findFirst, findAndDeleteFirst } from 'obj-traverse/lib/obj-traverse';
+import { findAndModifyFirst, findFirst } from 'obj-traverse/lib/obj-traverse';
+import { connect } from 'react-redux';
+import * as actions from './store/action_creators';
 
-import { flatten, findObj, deepClone } from './lib';
+import { findObj, deepClone } from './lib';
 import { FORM_ADD, FORM_EDIT } from './lib/const';
 import './App.css';
 import CategoryList from './components/category_list';
@@ -9,7 +11,7 @@ import TaskList from './components/task_list';
 import ProgressBar from './components/progressBar';
 import Filter from './components/filter';
 
-export default class App extends React.Component {
+class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -42,7 +44,6 @@ export default class App extends React.Component {
       ],
       category: null,
       categoryId: 0,
-      percentage: 0,
       taskList: [],
       showDone: false,
       formState: {
@@ -54,113 +55,23 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    this.calculatePercentage();
+    const { calculatePercentage, data } = this.props;
+    calculatePercentage({ data });
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (JSON.stringify(this.state.data) !== JSON.stringify(prevState.data)) {
-      this.calculatePercentage();
-      this.rerenderItems();
+  componentDidUpdate(prevProps) {
+    const { showDone, data, rerenderItems, calculatePercentage, categoryId } = this.props;
+    if (JSON.stringify(data) !== JSON.stringify(prevProps.data)) {
+      calculatePercentage({ data });
+      rerenderItems({ categoryId, showDone, data });
+    }
+    if (prevProps.showDone !== showDone) {
+      rerenderItems({ categoryId, showDone, data });
+    }
+    if (prevProps.categoryId !== categoryId) {
+      rerenderItems({ categoryId, showDone, data });
     }
   }
-
-  calculatePercentage = () => {
-    const { data } = this.state;
-    if (data.length) {
-      const tree = deepClone(data);
-      const allItems = flatten(tree)
-        .map(item => item.items)
-        .reduce((acc, item) => acc.concat(item));
-      const { length } = allItems;
-      const { length: doneLength } = allItems.filter(item => item.done);
-      const percentage = (doneLength / length) * 100;
-      this.setState({ percentage });
-    }
-  };
-
-  showAllItems = () => {
-    const tree = deepClone(this.state.data);
-    const category = findObj(tree, this.state.category.id);
-    this.setState({ taskList: category.items });
-  };
-
-  showOnlyDoneItems = () => {
-    const tree = deepClone(this.state.data);
-    const category = findObj(tree, this.state.category.id);
-    const taskList = category.items.filter(item => item.done);
-    this.setState({ taskList });
-  };
-
-  rerenderItems = () => {
-    const { showDone, category } = this.state;
-    if (category) {
-      showDone ? this.showOnlyDoneItems() : this.showAllItems();
-    }
-  };
-
-  handleShowItems = id => {
-    const tree = deepClone(this.state.data);
-    const category = findObj(tree, id);
-    this.setState({ taskList: category.items, category, categoryId: id });
-  };
-
-  handleAddCategory = text => {
-    const newCategory = {
-      id: Date.now(),
-      name: text,
-      items: [],
-      sub: []
-    };
-    this.setState({
-      data: [newCategory, ...this.state.data]
-    });
-  };
-
-  handleAddSubcategory = (id, text) => {
-    const newCategory = {
-      id: Date.now(),
-      name: text,
-      items: [],
-      sub: []
-    };
-    const newStateData = this.state.data.map(item => {
-      const cell = findFirst(item, 'sub', { id });
-      if (item.id === id) {
-        return { ...item, sub: [newCategory, ...item.sub] };
-      } else if (cell) {
-        return findAndModifyFirst(
-          item,
-          'sub',
-          { id },
-          { ...cell, sub: [newCategory, ...cell.sub] }
-        );
-      } else {
-        return item;
-      }
-    });
-    this.setState({ data: newStateData });
-  };
-
-  handleDeleteCategory = id => {
-    const { categoryId } = this.state;
-    const tree = deepClone(this.state.data);
-    const newStateData = tree
-      .map(item => {
-        const cell = findFirst(item, 'sub', { id });
-        if (item.id === id) {
-          return false;
-        } else if (cell) {
-          return findAndDeleteFirst(item, 'sub', { id });
-        } else {
-          return item;
-        }
-      })
-      .filter(item => !!item);
-    this.setState({ data: newStateData });
-    if (!newStateData.length || (categoryId && categoryId === id)) {
-      this.setState({ taskList: [] });
-    }
-  };
 
   handleEditCategoryName = (id, text) => {
     const tree = deepClone(this.state.data);
@@ -325,67 +236,43 @@ export default class App extends React.Component {
     }
   };
 
-  handleToggleReady = id => {
-    const { data, category } = this.state;
-    const tree = deepClone(data);
-    const newStateData = tree.map(item => {
-      const cell = findFirst(item, 'sub', { id: category.id });
-      if (cell) {
-        const newCellItems = cell.items.map(item => {
-          if (item.id === id) item.done = !item.done;
-          return item;
-        });
-        return findAndModifyFirst(
-          item,
-          'sub',
-          { id: category.id },
-          { ...cell, items: newCellItems }
-        );
-      } else {
-        return item;
-      }
-    });
-    this.setState({ data: newStateData });
-  };
-
-  handleSwitchShowDone = () => {
-    const { showDone } = this.state;
-    this.setState({ showDone: !showDone }, this.rerenderItems);
-  };
-
   render() {
-    const { percentage, data, taskList, showDone, categoryId, formState } = this.state;
+    const { formState } = this.state;
     return (
       <div className="App container">
-        <Filter
-          formState={formState}
-          onSwitchShowDone={this.handleSwitchShowDone}
-          showDone={showDone}
-        />
-        <ProgressBar percentage={percentage} />
+        <Filter formState={formState} />
+        <ProgressBar />
         <div className="Main_body">
           <CategoryList
-            data={data}
-            categoryId={categoryId}
             formState={formState}
             onMoveTaskIntoAnotherCategory={this.handleMoveTaskIntoAnotherCategory}
-            onAddSubCategory={this.handleAddSubcategory}
-            onShowItems={this.handleShowItems}
             onEditCategoryName={this.handleEditCategoryName}
-            onDeleteCategory={this.handleDeleteCategory}
-            onAddCategory={this.handleAddCategory}
           />
           <TaskList
-            taskList={taskList}
             onUpgradeItems={this.handleUpgradeItems}
             onShowDetails={this.handleShowDetails}
             onCloseDetails={this.handleCloseDetails}
             formState={formState}
             onAddItem={this.handleAddItem}
-            onToggleReady={this.handleToggleReady}
           />
         </div>
       </div>
     );
   }
 }
+
+const mapStateToProps = store => ({
+  showDone: store.app.showDone,
+  data: store.app.data,
+  categoryId: store.app.category && store.app.category.id
+});
+
+const mapDispatchToProps = dispatch => ({
+  calculatePercentage: payload => dispatch(actions.calculatePercentage(payload)),
+  rerenderItems: payload => dispatch(actions.rerenderItems(payload))
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App);

@@ -8,6 +8,8 @@ import {
 
 import './index.css';
 import { FORM_ADD } from '../../lib/const';
+import { connect } from 'react-redux';
+import * as actions from '../../store/action_creators';
 
 const plusIcon = <div style={{ cursor: 'pointer' }}>
     <FontAwesomeIcon icon={faPlusSquare} />
@@ -37,12 +39,14 @@ const Category = props => {
     const [text, setText] = useState('');
     const [status, setStatus] = useState(null);
 
-    const { onShowItems, item, categoryId, onDeleteCategory,
-        onEditCategoryName, onAddSubCategory, formState, onMoveTaskIntoAnotherCategory } = props;
+    const { item, categoryId, deleteCategory,
+        onEditCategoryName, addSubCategory,
+        formState, onMoveTaskIntoAnotherCategory,
+        onSelectCategory, data } = props;
     const { name, sub, id } = item;
 
-    const handleShowItems = () => onShowItems(id);
-    const handleDeleteCategory = () => onDeleteCategory(id);
+    const handleShowItems = () => onSelectCategory({ data, id });
+    const handleDeleteCategory = () => deleteCategory({ data, id });
     const handleShowSubCategories = () => switchVisible(state => !state);
     const handleChangeText = e => setText(e.target.value);
     const handleCancel = () => {
@@ -60,7 +64,7 @@ const Category = props => {
             if (status === 'editCategoryName') {
                 onEditCategoryName(id, text);
             } else if (status === 'addSubCategory') {
-                onAddSubCategory(id, text);
+                addSubCategory({ text, id, data });
             }
         }
         setText('');
@@ -138,11 +142,12 @@ const Category = props => {
                             item={item}
                             formState={formState}
                             categoryId={categoryId}
+                            data={data}
+                            onSelectCategory={onSelectCategory}
                             onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
-                            onAddSubCategory={onAddSubCategory}
+                            addSubCategory={addSubCategory}
                             onEditCategoryName={onEditCategoryName}
-                            onDeleteCategory={onDeleteCategory}
-                            onShowItems={onShowItems}
+                            deleteCategory={deleteCategory}
                         />)
                 }
             </div>
@@ -150,4 +155,15 @@ const Category = props => {
     )
 }
 
-export default Category;
+const mapStateToProps = store => ({
+    data: store.app.data,
+    categoryId: store.app.category && store.app.category.id
+})
+
+const mapDispatchToProps = dispatch => ({
+    onSelectCategory: payload => dispatch(actions.selectCategory(payload)),
+    addSubCategory: payload => dispatch(actions.addSubCategory(payload)),
+    deleteCategory: payload => dispatch(actions.deleteCategory(payload))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Category);

@@ -1,4 +1,6 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import * as actions from '../../store/action_creators';
 
 import './index.css';
 import TextInput from '../textInput';
@@ -6,8 +8,9 @@ import Category from '../category';
 import { FORM_ADD } from '../../lib/const';
 
 const CategoryList = (props) => {
-    const { data, onShowItems, onAddCategory, categoryId, onMoveTaskIntoAnotherCategory,
-        onDeleteCategory, onAddSubCategory, onEditCategoryName, formState } = props;
+    const { data, addNewCategory, onMoveTaskIntoAnotherCategory,
+        onEditCategoryName, formState } = props;
+    const handleAddCategory = text => addNewCategory({ text, data });
     return (
         <div className="category-list">
             {
@@ -15,27 +18,35 @@ const CategoryList = (props) => {
                 <div style={{ margin: '0 20px 20px 0' }}>
                     <TextInput
                         name='category'
-                        onClick={onAddCategory}
+                        onClick={handleAddCategory}
                         placeholder="Enter category title"
-                        buttonName="Add" />
+                        buttonName="Add"
+                    />
                 </div>
             }
             {
-                data.length ? data.map(item =>
-                    <Category
-                        key={item.id}
-                        formState={formState}
-                        categoryId={categoryId}
-                        item={item}
-                        onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
-                        onAddSubCategory={onAddSubCategory}
-                        onEditCategoryName={onEditCategoryName}
-                        onShowItems={onShowItems}
-                        onDeleteCategory={onDeleteCategory}
-                    />) : <div>No categories</div>
+                data && data.length ?
+                    data.map(item =>
+                        <Category
+                            key={item.id}
+                            formState={formState}
+                            item={item}
+                            onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
+                            onEditCategoryName={onEditCategoryName}
+
+                        />) :
+                    <div>No categories</div>
             }
         </div>
     )
 }
 
-export default CategoryList;
+const mapStateToProps = store => ({
+    data: store.app.data
+})
+
+const mapDispatchToProps = dispatch => ({
+    addNewCategory: payload => dispatch(actions.addNewCategory(payload))
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(CategoryList);

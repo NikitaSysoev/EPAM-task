@@ -1,9 +1,11 @@
 import React from 'react';
 import TextInput from '../textInput';
 import { FORM_EDIT } from '../../lib/const';
+import { connect } from 'react-redux';
+import * as actions from '../../store/action_creators';
 
 const Filter = (props) => {
-    const { onSwitchShowDone, showDone, formState } = props;
+    const { showDone, formState, handleSwitchDone } = props;
     return (
         <div style={{
             display: 'flex',
@@ -20,7 +22,7 @@ const Filter = (props) => {
             }}>
                 <label style={{ marginRight: '20px', cursor: 'ponter' }}>
                     <input type="checkbox"
-                        onChange={onSwitchShowDone}
+                        onChange={handleSwitchDone}
                         defaultChecked={showDone}
                     />
                     Show done
@@ -34,4 +36,12 @@ const Filter = (props) => {
     )
 }
 
-export default Filter;
+const mapStateToProps = store => ({
+    showDone: store.app.showDone
+})
+
+const mapDispatchToProps = dispatch => ({
+    handleSwitchDone: () => dispatch(actions.switchShowDone())
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Filter);

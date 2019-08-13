@@ -1,15 +1,17 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEdit } from '@fortawesome/free-solid-svg-icons';
+import { connect } from 'react-redux';
+import * as actions from '../../store/action_creators';
 
 const detailsIcon = <div style={{ marginLeft: '5px', cursor: 'pointer' }}>
     <FontAwesomeIcon icon={faEdit} />
 </div>
 
 const Task = props => {
-    const { item, onToggleReady, onShowDetails } = props;
+    const { item, onShowDetails, toggleDone, data, category } = props;
     const { title, done, id } = item;
-    const handleChecked = () => onToggleReady(id);
+    const handleChecked = () => toggleDone({ id, data, category });
     const handleShowDetails = () => onShowDetails(id);
     return (
         <div className="card">
@@ -33,4 +35,13 @@ const Task = props => {
     )
 }
 
-export default Task;
+const mapStateToProps = store => ({
+    data: store.app.data,
+    category: store.app.category,
+});
+
+const mapDispatchToProps = dispatch => ({
+    toggleDone: payload => dispatch(actions.toggleDone(payload))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Task);
