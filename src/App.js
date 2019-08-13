@@ -73,21 +73,6 @@ class App extends React.Component {
     }
   }
 
-  handleEditCategoryName = (id, text) => {
-    const tree = deepClone(this.state.data);
-    const newStateData = tree.map(item => {
-      const cell = findFirst(item, 'sub', { id });
-      if (item.id === id) {
-        return { ...item, name: text };
-      } else if (cell) {
-        return findAndModifyFirst(item, 'sub', { id }, { ...cell, name: text });
-      } else {
-        return item;
-      }
-    });
-    this.setState({ data: newStateData });
-  };
-
   handleShowDetails = id => {
     const tree = deepClone(this.state.data);
     const category = findObj(tree, this.state.categoryId);
@@ -246,7 +231,6 @@ class App extends React.Component {
           <CategoryList
             formState={formState}
             onMoveTaskIntoAnotherCategory={this.handleMoveTaskIntoAnotherCategory}
-            onEditCategoryName={this.handleEditCategoryName}
           />
           <TaskList
             onUpgradeItems={this.handleUpgradeItems}

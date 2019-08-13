@@ -40,12 +40,11 @@ const Category = props => {
     const [status, setStatus] = useState(null);
 
     const { item, categoryId, deleteCategory,
-        onEditCategoryName, addSubCategory,
-        formState, onMoveTaskIntoAnotherCategory,
-        onSelectCategory, data } = props;
+        addSubCategory, formState, onMoveTaskIntoAnotherCategory,
+        editCategoryName, selectCategory, data } = props;
     const { name, sub, id } = item;
 
-    const handleShowItems = () => onSelectCategory({ data, id });
+    const handleShowItems = () => selectCategory({ data, id });
     const handleDeleteCategory = () => deleteCategory({ data, id });
     const handleShowSubCategories = () => switchVisible(state => !state);
     const handleChangeText = e => setText(e.target.value);
@@ -62,7 +61,7 @@ const Category = props => {
     const handleAccept = () => {
         if (edit && text) {
             if (status === 'editCategoryName') {
-                onEditCategoryName(id, text);
+                editCategoryName({ id, text, data });
             } else if (status === 'addSubCategory') {
                 addSubCategory({ text, id, data });
             }
@@ -143,10 +142,10 @@ const Category = props => {
                             formState={formState}
                             categoryId={categoryId}
                             data={data}
-                            onSelectCategory={onSelectCategory}
+                            selectCategory={selectCategory}
                             onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
                             addSubCategory={addSubCategory}
-                            onEditCategoryName={onEditCategoryName}
+                            editCategoryName={editCategoryName}
                             deleteCategory={deleteCategory}
                         />)
                 }
@@ -158,12 +157,13 @@ const Category = props => {
 const mapStateToProps = store => ({
     data: store.app.data,
     categoryId: store.app.category && store.app.category.id
-})
+});
 
 const mapDispatchToProps = dispatch => ({
-    onSelectCategory: payload => dispatch(actions.selectCategory(payload)),
+    selectCategory: payload => dispatch(actions.selectCategory(payload)),
     addSubCategory: payload => dispatch(actions.addSubCategory(payload)),
-    deleteCategory: payload => dispatch(actions.deleteCategory(payload))
-})
+    deleteCategory: payload => dispatch(actions.deleteCategory(payload)),
+    editCategoryName: payload => dispatch(actions.editCategoryName(payload))
+});
 
 export default connect(mapStateToProps, mapDispatchToProps)(Category);

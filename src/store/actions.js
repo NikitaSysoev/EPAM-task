@@ -6,4 +6,4 @@ export const SELECT_CATEGORY = 'SELECT_CATEGORY';
 
 export const UPDATE_DATA = 'UPDATE_DATA';
 
-export const RERENDER_ITEMS = 'RERENDER_ITEMS';
+export const UPDATE_ITEMS = 'UPDATE_ITEMS';

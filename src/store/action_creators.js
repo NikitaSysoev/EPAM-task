@@ -12,7 +12,7 @@ export function calculatePercentage(payload) {
       .reduce((acc, item) => acc.concat(item));
     const { length } = allItems;
     const { length: doneLength } = allItems.filter(item => item.done);
-    percentage = (doneLength / length) * 100;
+    percentage = length === 0 ? 0 : (doneLength / length) * 100;
   } else {
     percentage = 0;
   }
@@ -72,24 +72,25 @@ export function rerenderItems(payload) {
         taskList = [];
       }
     }
-  } else {
+  } else if (data && !data.length) {
     taskList = [];
   }
   return {
-    type: ACT.RERENDER_ITEMS,
+    type: ACT.UPDATE_ITEMS,
     payload: { taskList }
   };
 }
 
 export function addNewCategory(payload) {
   const { text, data } = payload;
+  const tree = deepClone(data);
   const newCategory = {
     id: Date.now(),
     name: text,
     items: [],
     sub: []
   };
-  const newStateData = [newCategory, ...data];
+  const newStateData = [newCategory, ...tree];
   return {
     type: ACT.UPDATE_DATA,
     payload: { newStateData }
@@ -98,13 +99,14 @@ export function addNewCategory(payload) {
 
 export function addSubCategory(payload) {
   const { text, data, id } = payload;
+  const tree = deepClone(data);
   const newCategory = {
     id: Date.now(),
     name: text,
     items: [],
     sub: []
   };
-  const newStateData = data.map(item => {
+  const newStateData = tree.map(item => {
     const cell = findFirst(item, 'sub', { id });
     if (item.id === id) {
       return { ...item, sub: [newCategory, ...item.sub] };
@@ -135,6 +137,25 @@ export function deleteCategory(payload) {
       }
     })
     .filter(item => !!item);
+  return {
+    type: ACT.UPDATE_DATA,
+    payload: { newStateData }
+  };
+}
+
+export function editCategoryName(payload) {
+  const { id, text, data } = payload;
+  const tree = deepClone(data);
+  const newStateData = tree.map(item => {
+    const cell = findFirst(item, 'sub', { id });
+    if (item.id === id) {
+      return { ...item, name: text };
+    } else if (cell) {
+      return findAndModifyFirst(item, 'sub', { id }, { ...cell, name: text });
+    } else {
+      return item;
+    }
+  });
   return {
     type: ACT.UPDATE_DATA,
     payload: { newStateData }

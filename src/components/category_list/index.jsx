@@ -8,8 +8,7 @@ import Category from '../category';
 import { FORM_ADD } from '../../lib/const';
 
 const CategoryList = (props) => {
-    const { data, addNewCategory, onMoveTaskIntoAnotherCategory,
-        onEditCategoryName, formState } = props;
+    const { data, addNewCategory, onMoveTaskIntoAnotherCategory, formState } = props;
     const handleAddCategory = text => addNewCategory({ text, data });
     return (
         <div className="category-list">
@@ -32,8 +31,6 @@ const CategoryList = (props) => {
                             formState={formState}
                             item={item}
                             onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
-                            onEditCategoryName={onEditCategoryName}
-
                         />) :
                     <div>No categories</div>
             }

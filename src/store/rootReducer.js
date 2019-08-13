@@ -32,8 +32,7 @@ const initialState = {
   showDone: false,
   taskList: [],
   percentage: 0,
-  category: null,
-  // categoryId: 0
+  category: null
 };
 
 function rootReducer(store = initialState, action) {
@@ -51,7 +50,7 @@ function rootReducer(store = initialState, action) {
       };
     case ACT.UPDATE_DATA:
       return { ...store, data: action.payload.newStateData };
-    case ACT.RERENDER_ITEMS:
+    case ACT.UPDATE_ITEMS:
       return { ...store, taskList: action.payload.taskList };
     default:
       return store;
