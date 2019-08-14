@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-    faPlusSquare, faShoppingBasket, faEdit, faAngleDown, faAngleRight,
-    faBan, faCheck, faArrowCircleLeft
-}
-    from '@fortawesome/free-solid-svg-icons';
+    faPlusSquare, faShoppingBasket, faEdit, faAngleDown,
+    faAngleRight, faBan, faCheck, faArrowCircleLeft
+} from '@fortawesome/free-solid-svg-icons';
 
 import './index.css';
 import { FORM_ADD } from '../../lib/const';
@@ -40,7 +39,7 @@ const Category = props => {
     const [status, setStatus] = useState(null);
 
     const { item, categoryId, deleteCategory,
-        addSubCategory, formState, onMoveTaskIntoAnotherCategory,
+        addSubCategory, formState, changeCategoryForTask,
         editCategoryName, selectCategory, data } = props;
     const { name, sub, id } = item;
 
@@ -70,7 +69,7 @@ const Category = props => {
         setEdit(false);
         setStatus(null);
     }
-    const handleMoveTaskIntoAnotherCategory = () => onMoveTaskIntoAnotherCategory(id);
+    const handleChangeCategoryForTask = () => changeCategoryForTask({ id });
 
     return (
         <div className="category">
@@ -121,7 +120,7 @@ const Category = props => {
                                 </div>
                             </div>
                             : !edit ?
-                                <div onClick={handleMoveTaskIntoAnotherCategory}
+                                <div onClick={handleChangeCategoryForTask}
                                     style={{
                                         marginRight: '5px', cursor: 'pointer',
                                         color: formState.currentCategoryId === id ? 'grey' : "black"
@@ -143,7 +142,7 @@ const Category = props => {
                             categoryId={categoryId}
                             data={data}
                             selectCategory={selectCategory}
-                            onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
+                            changeCategoryForTask={changeCategoryForTask}
                             addSubCategory={addSubCategory}
                             editCategoryName={editCategoryName}
                             deleteCategory={deleteCategory}
@@ -163,7 +162,8 @@ const mapDispatchToProps = dispatch => ({
     selectCategory: payload => dispatch(actions.selectCategory(payload)),
     addSubCategory: payload => dispatch(actions.addSubCategory(payload)),
     deleteCategory: payload => dispatch(actions.deleteCategory(payload)),
-    editCategoryName: payload => dispatch(actions.editCategoryName(payload))
+    editCategoryName: payload => dispatch(actions.editCategoryName(payload)),
+    changeCategoryForTask: payload => dispatch(actions.changeCategoryForTask(payload))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Category);

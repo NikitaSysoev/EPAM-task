@@ -37,7 +37,8 @@ const Filter = (props) => {
 }
 
 const mapStateToProps = store => ({
-    showDone: store.app.showDone
+    showDone: store.app.showDone,
+    formState: store.app.formState
 })
 
 const mapDispatchToProps = dispatch => ({

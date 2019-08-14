@@ -1,14 +1,14 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import * as actions from '../../store/action_creators';
 
+import * as actions from '../../store/action_creators';
 import './index.css';
 import TextInput from '../textInput';
 import Category from '../category';
 import { FORM_ADD } from '../../lib/const';
 
 const CategoryList = (props) => {
-    const { data, addNewCategory, onMoveTaskIntoAnotherCategory, formState } = props;
+    const { data, addNewCategory, formState } = props;
     const handleAddCategory = text => addNewCategory({ text, data });
     return (
         <div className="category-list">
@@ -30,7 +30,6 @@ const CategoryList = (props) => {
                             key={item.id}
                             formState={formState}
                             item={item}
-                            onMoveTaskIntoAnotherCategory={onMoveTaskIntoAnotherCategory}
                         />) :
                     <div>No categories</div>
             }
@@ -39,7 +38,8 @@ const CategoryList = (props) => {
 }
 
 const mapStateToProps = store => ({
-    data: store.app.data
+    data: store.app.data,
+    formState: store.app.formState
 })
 
 const mapDispatchToProps = dispatch => ({
