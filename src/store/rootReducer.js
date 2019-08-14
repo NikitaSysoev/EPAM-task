@@ -4,31 +4,15 @@ import { FORM_ADD } from '../lib/const';
 
 const initialState = {
   data: [
-    // {
-    //   id: 3,
-    //   name: 'category3',
-    //   items: [
-    //     { id: 31, title: 'to do item 5', done: true, description: 'okey' },
-    //     { id: 32, title: 'to do item 6', done: false, description: 'lets go' }
-    //   ],
-    //   sub: [
-    //     {
-    //       id: 5,
-    //       name: 'category3 2',
-    //       items: [
-    //         { id: 41, title: 'to do item 7', done: false },
-    //         { id: 42, title: 'to do item 8', done: false }
-    //       ],
-    //       sub: [
-    //         {
-    //           id: 55,
-    //           name: 'ok',
-    //           items: [{ id: 551, title: 'ok', done: true }]
-    //         }
-    //       ]
-    //     }
-    //   ]
-    // }
+    {
+      id: 3,
+      name: 'category3',
+      items: [
+        { id: 31, title: 'to do item 5', done: true, description: 'okey' },
+        { id: 32, title: 'to do item 6', done: false, description: 'lets go' }
+      ],
+      sub: []
+    }
   ],
   showDone: false,
   taskList: [],

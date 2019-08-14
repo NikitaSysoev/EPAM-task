@@ -320,3 +320,14 @@ export function saveChanges(payload) {
     payload: { newStateData }
   };
 }
+
+export function filterTaskList(payload) {
+  const { text, data, categoryId } = payload;
+  const tree = deepClone(data);
+  const category = findObj(tree, categoryId);
+  const newTaskList = category.items.filter(item => item.title.startsWith(text));
+  return {
+    type: ACT.UPDATE_ITEMS,
+    payload: { taskList: newTaskList }
+  };
+}

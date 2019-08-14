@@ -1,11 +1,25 @@
 import React from 'react';
+import { connect } from 'react-redux';
+
 import TextInput from '../textInput';
 import { FORM_EDIT } from '../../lib/const';
-import { connect } from 'react-redux';
 import * as actions from '../../store/action_creators';
 
 const Filter = (props) => {
-    const { showDone, formState, handleSwitchDone } = props;
+    const { showDone, formState, handleSwitchDone,
+        filterTaskList, data, categoryId, selectCategory } = props;
+
+    const handleFilter = text => {
+        if (categoryId) {
+            filterTaskList({ text, data, categoryId })
+        }
+    }
+    const handleCancelFilter = () => {
+        if (categoryId) {
+            selectCategory({ data, id: categoryId })
+        }
+    }
+
     return (
         <div style={{
             display: 'flex',
@@ -30,6 +44,8 @@ const Filter = (props) => {
                 <TextInput
                     placeholder="Search"
                     width="300px"
+                    onChange={handleFilter}
+                    onClick={handleCancelFilter}
                 />
             </div>
         </div>
@@ -38,11 +54,15 @@ const Filter = (props) => {
 
 const mapStateToProps = store => ({
     showDone: store.app.showDone,
-    formState: store.app.formState
+    formState: store.app.formState,
+    data: store.app.data,
+    categoryId: store.app.category && store.app.category.id
 })
 
 const mapDispatchToProps = dispatch => ({
-    handleSwitchDone: () => dispatch(actions.switchShowDone())
+    handleSwitchDone: () => dispatch(actions.switchShowDone()),
+    filterTaskList: (payload) => dispatch(actions.filterTaskList(payload)),
+    selectCategory: payload => dispatch(actions.selectCategory(payload))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Filter);
